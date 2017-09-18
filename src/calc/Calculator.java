@@ -3,15 +3,16 @@ package calc;
 import calc.Tokenizer.Token;
 import calc.Tokenizer.TokenType;
 
+/**
+ * Parses according to the following grammar
+ * 
+ * operand -> ( operand
+ * operand -> number n-ary
+ * n-ary -> operator operand
+ * n-ary -> ) n-ary
+ */
 public class Calculator {
-
-    // Grammar
-    // start -> expression
-    // expression -> item operator expression
-    // expression -> item
-    // item -> ( expression )
-    // item -> number
-
+    
     public static void main(String args[]) {
         try {
             System.out.println(calculateString("-1"));
@@ -28,12 +29,12 @@ public class Calculator {
     
     public static float calculateFloat(String input) throws ParseException {
         Tokenizer tokenizer = new Tokenizer(input);
-        Nary nary = nextNary(tokenizer);
-        Expression expression = nary.toExpression();
+        OperandLinkedList operand = nextOperand(tokenizer);
+        Expression expression = operand.toExpression();
         return expression.evaluate();
     }
 
-    static Nary nextNary(Tokenizer tokenizer) throws ParseException {
+    static OperandLinkedList nextOperand(Tokenizer tokenizer) throws ParseException {
         if (!tokenizer.hasNext()) {
             // Else throw parseexception
             // TODO: Unless original string is all whitespace
@@ -44,16 +45,16 @@ public class Calculator {
 
         if (token.type == TokenType.NUMBER) {
             // Return the nary formed from exp and narymore
-            Nary nary = new Nary();
-            nary.expression = new Number(Float.valueOf(token.value)); // TODO NFE
-            nary.narymore = nextNarymore(tokenizer);
-            return nary;
+            OperandLinkedList operand = new OperandLinkedList();
+            operand.expression = new Number(Float.valueOf(token.value)); // TODO NFE
+            operand.nary = nextNaryLinkedList(tokenizer);
+            return operand;
         } else if (token.type == TokenType.OPEN_PAREN) {
-            // Grab next nary. The next token should be a closed paren, then
+            // Grab next operand linked list. The next token should be a closed paren, then
             // next narymore
-            Nary group = new Nary();
-            group.expression = nextNary(tokenizer);
-            group.narymore = nextNarymore(tokenizer);
+            OperandLinkedList group = new OperandLinkedList();
+            group.expression = nextOperand(tokenizer);
+            group.nary = nextNaryLinkedList(tokenizer);
 
             // Hmmmm, I think the grammar ensures the parentheses
             // are balance---otherwise, there'd be a parse error
@@ -70,20 +71,20 @@ public class Calculator {
 
     }
 
-    static Narymore nextNarymore(Tokenizer tokenizer) throws ParseException {
+    static NaryLinkedList nextNaryLinkedList(Tokenizer tokenizer) throws ParseException {
         if (!tokenizer.hasNext()) {
             // EOF allowed
-            return Narymore.EMPTY;
+            return NaryLinkedList.EMPTY;
         }
         Token token = tokenizer.nextNaryToken();
         
         if (token.type == TokenType.OPERATOR) {
             // Make a new operator whose first argument is exp
-            OperatorOld operator = new OperatorOld();
+            NaryLinkedList operator = new NaryLinkedList();
             operator.symbol = token.value;
 
-            // Scan for the next nary object, store it in tree
-            operator.nary = nextNary(tokenizer);
+            // Scan for the next operand object, store it in tree
+            operator.nary = nextOperand(tokenizer);
 
             return operator;
         } else if (token.type == TokenType.CLOSE_PAREN) {
@@ -91,22 +92,23 @@ public class Calculator {
             // complete nary
             // return a null narymore
             // TODO: Fix
-            return Narymore.EMPTY;
+            return NaryLinkedList.EMPTY;
         } else {
             throw new ParseException("Expecting an operator, or unclosed parentheses");
         }
     }
 
-    static class Nary implements Expression {
+    // Represents a linked list of an operand, followed by an optional list of n operators
+    static class OperandLinkedList implements Expression {
         Expression expression;
-        Narymore narymore;
+        NaryLinkedList nary;
 
         public Expression toExpression() {
             Operation rootOperation = null;
-            Nary next = this;
+            OperandLinkedList next = this;
 
-            while (next.narymore != Narymore.EMPTY) {
-                OperatorOld operator = (OperatorOld) next.narymore;
+            while (next.nary != NaryLinkedList.EMPTY) {
+                NaryLinkedList operator = next.nary;
 
                 Operation operation = new Operation(operator.symbol);
 
@@ -147,15 +149,6 @@ public class Calculator {
 
     }
 
-    static class Narymore {
-        static Narymore EMPTY = new Narymore() {
-            @Override
-            public String toString() {
-                return "[EMPTY Narymore]";
-            }
-        };
-    }
-
     static interface Expression {
         float evaluate();
         Expression toExpression(); // TODO fix
@@ -184,9 +177,16 @@ public class Calculator {
         }
     }
 
-    static class OperatorOld extends Narymore {
+    static class NaryLinkedList {
         String symbol;
-        Nary nary;
+        OperandLinkedList nary;
+
+        static NaryLinkedList EMPTY = new NaryLinkedList() {
+            @Override
+            public String toString() {
+                return "[EMPTY NaryLinkedList]";
+            }
+        };
 
         @Override
         public String toString() {
