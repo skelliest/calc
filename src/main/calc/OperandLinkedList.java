@@ -1,7 +1,7 @@
 package calc;
 
 // Represents a linked list of an operand, followed by an optional list of n operators
-public class OperandLinkedList implements Expression {
+public class OperandLinkedList {
     Expression expression;
     NaryLinkedList nary;
 
@@ -17,7 +17,7 @@ public class OperandLinkedList implements Expression {
             // Precedence
             if (rootOperation == null) {
                 // Our first pass through
-                operation.a = this.expression.toExpression();
+                operation.a = this.expression;
                 rootOperation = operation;
             } else if (operation.compareTo(rootOperation) > 0) {
                 // The new operation has higher precedence
@@ -31,17 +31,11 @@ public class OperandLinkedList implements Expression {
                 rootOperation = operation;
             }
 
-            operation.b = operator.nary.expression.toExpression();
+            operation.b = operator.nary.expression;
             next = operator.nary;
         }
 
         return rootOperation;
-    }
-
-    // TODO: Remove, Nary isn't an expression
-    @Override
-    public float evaluate() {
-        return toExpression().evaluate();
     }
     
     @Override

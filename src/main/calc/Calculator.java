@@ -29,12 +29,12 @@ public class Calculator {
     
     public static float calculateFloat(String input) throws ParseException {
         Tokenizer tokenizer = new Tokenizer(input);
-        OperandLinkedList operand = nextOperand(tokenizer);
+        OperandLinkedList operand = nextOperandLinkedList(tokenizer);
         Expression expression = operand.toExpression();
         return expression.evaluate();
     }
 
-    static OperandLinkedList nextOperand(Tokenizer tokenizer) throws ParseException {
+    static OperandLinkedList nextOperandLinkedList(Tokenizer tokenizer) throws ParseException {
         if (!tokenizer.hasNext()) {
             // Else throw parseexception
             // TODO: Unless original string is all whitespace
@@ -53,7 +53,7 @@ public class Calculator {
             // Grab next operand linked list. The next token should be a closed paren, then
             // next narymore
             OperandLinkedList group = new OperandLinkedList();
-            group.expression = nextOperand(tokenizer);
+            group.expression = nextOperandLinkedList(tokenizer).toExpression();
             group.nary = nextNaryLinkedList(tokenizer);
 
             // Hmmmm, I think the grammar ensures the parentheses
@@ -84,7 +84,7 @@ public class Calculator {
             operator.symbol = token.value;
 
             // Scan for the next operand object, store it in tree
-            operator.nary = nextOperand(tokenizer);
+            operator.nary = nextOperandLinkedList(tokenizer);
 
             return operator;
         } else if (token.type == TokenType.CLOSE_PAREN) {

@@ -16,9 +16,4 @@ class Number implements Expression {
     public float evaluate() {
         return value;
     }
-
-    @Override
-    public Expression toExpression() {
-        return this;
-    }
 }

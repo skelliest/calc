@@ -47,9 +47,4 @@ public class Operation implements Expression, Comparable<Operation> {
             return 0;
         }
     }
-
-    @Override
-    public Expression toExpression() {
-        return this;
-    }
 }
