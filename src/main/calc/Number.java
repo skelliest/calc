@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 class Number implements Expression {
     BigDecimal value;
-    int fractionalSigfig;
 
     public static Number valueOf(String string) {
         Number number = new Number();

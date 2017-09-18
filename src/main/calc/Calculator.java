@@ -6,37 +6,44 @@ import calc.Tokenizer.Token;
 import calc.Tokenizer.TokenType;
 
 /**
- * Parses according to the following grammar
+ * A four function calculator, allowing parentheses. Parsing of parentheses groups
+ * is done recursively, therefore the call stack grows linearly with the number
+ * of nested parentheses groups. This would cause a stack overflow of highly nested
+ * expressions. Non-recursive, state-based parsing would be better.
  * 
+ * Parses according to the following grammar
  * operand -> ( operand
  * operand -> number n-ary
  * n-ary -> operator operand
  * n-ary -> ) n-ary
+ * 
+ * (Actually, it's this, to ensure parentheses are balanced)
+ * start -> operand
+ * operand -> ( open-operand
+ * operand -> number n-ary
+ * n-ary -> operator operand
+ * n-ary -> ) n-ary
+ * n-ary -> [EOF]
+ * open-operand -> ( open-operand
+ * open-operand -> number open-n-ary
+ * open-n-ary -> operator open-operand
+ * open-n-ary -> ) n-ary
  */
 public class Calculator {
-    
-    public static void main(String args[]) {
-        try {
-            System.out.println(calculateString("-1"));
-        } catch (ParseException e) {
-            System.err.println(e.getMessage());
-        }
-    }
     
     public static String calculateString(String input) throws ParseException {
         try {
             Tokenizer tokenizer = new Tokenizer(input);
-            OperandLinkedList operand = nextOperandLinkedList(tokenizer);
+            OperandLinkedList operand = nextOperandLinkedList(tokenizer, false);
             Expression expression = operand.toExpression();
             BigDecimal answer = expression.evaluate();
-            // TODO: Fix scale
-            return answer.setScale(Math.min(answer.scale(), 19), BigDecimal.ROUND_DOWN).toString();
+            return answer.toString();
         } catch(ArithmeticException e) {
             return "NaN";
         }
     }
 
-    static OperandLinkedList nextOperandLinkedList(Tokenizer tokenizer) throws ParseException {
+    static OperandLinkedList nextOperandLinkedList(Tokenizer tokenizer, boolean open) throws ParseException {
         if (!tokenizer.hasNext()) {
             // Else throw parseexception
             // TODO: Unless original string is all whitespace
@@ -46,26 +53,18 @@ public class Calculator {
         Token token = tokenizer.nextOperandToken();
 
         if (token.type == TokenType.NUMBER) {
-            // Return the nary formed from exp and narymore
+            // Return the nary formed from exp and nary
             OperandLinkedList operand = new OperandLinkedList();
             operand.expression = Number.valueOf(token.value); // TODO NFE
-            operand.nary = nextNaryLinkedList(tokenizer);
+            operand.nary = nextNaryLinkedList(tokenizer, open);
             return operand;
         } else if (token.type == TokenType.OPEN_PAREN) {
-            // Grab next operand linked list. The next token should be a closed paren, then
-            // next narymore
+            // Grab next operand linked list. The next token should be a
+            // closed paren, then next nary
             OperandLinkedList group = new OperandLinkedList();
-            group.expression = nextOperandLinkedList(tokenizer).toExpression();
-            group.nary = nextNaryLinkedList(tokenizer);
+            group.expression = nextOperandLinkedList(tokenizer, true).toExpression();
+            group.nary = nextNaryLinkedList(tokenizer, open);
 
-            // Hmmmm, I think the grammar ensures the parentheses
-            // are balance---otherwise, there'd be a parse error
-            // TODO: FIX?
-//                Token closeParen = tokenizer.nextOperandToken();
-//
-//                if (closeParen.type != TokenType.CLOSE_PAREN) {
-//                    throw new ParseException("Expecting )");
-//                }
             return group;
         } else {
             throw new ParseException("Expecting an expression");
@@ -73,10 +72,13 @@ public class Calculator {
 
     }
 
-    static NaryLinkedList nextNaryLinkedList(Tokenizer tokenizer) throws ParseException {
+    static NaryLinkedList nextNaryLinkedList(Tokenizer tokenizer, boolean open) throws ParseException {
         if (!tokenizer.hasNext()) {
-            // EOF allowed
-            return NaryLinkedList.EMPTY;
+            if (open) {
+                throw new ParseException("Unclosed parentheses");
+            } else {
+                return NaryLinkedList.EMPTY; // EOF allowed
+            }
         }
         Token token = tokenizer.nextNaryToken();
         
@@ -86,14 +88,12 @@ public class Calculator {
             operator.symbol = token.value;
 
             // Scan for the next operand object, store it in tree
-            operator.nary = nextOperandLinkedList(tokenizer);
+            operator.nary = nextOperandLinkedList(tokenizer, open);
 
             return operator;
         } else if (token.type == TokenType.CLOSE_PAREN) {
             // If next token isn't an operator, the previous expression is the
             // complete nary
-            // return a null narymore
-            // TODO: Fix
             return NaryLinkedList.EMPTY;
         } else {
             throw new ParseException("Expecting an operator, or unclosed parentheses");

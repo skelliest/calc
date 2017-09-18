@@ -7,14 +7,14 @@ public class OperandLinkedList {
 
     // Transform this linked list into an expression tree.  This is what
     // takes care of the operator precedence
-    public Expression toExpression() {
+    public Expression toExpression() throws ParseException {
         Operation rootOperation = null;
         OperandLinkedList next = this;
 
         while (next.nary != NaryLinkedList.EMPTY) {
             NaryLinkedList operator = next.nary;
 
-            Operation operation = new Operation(operator.symbol);
+            Operation operation = Operation.createFromSymbol(operator.symbol);
 
             // Precedence
             if (rootOperation == null) {

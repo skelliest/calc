@@ -2,52 +2,70 @@ package calc;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
-public class Operation implements Expression, Comparable<Operation> {
+public class Operation implements Expression, Comparable<Operation> {    
     Expression a, b;
 
-    private String symbol;
-    protected int precedent;
+    private Operator operator;
+    private static final MathContext SIGFIG_20_CONTEXT = new MathContext(20, RoundingMode.HALF_EVEN);
 
-    public Operation(String symbol) {
-        this.symbol = symbol;
-
-        // TODO move to subclass
-        if ("*".equals(symbol) || "/".equals(symbol)) {
-            precedent = 2;
+    public static Operation createFromSymbol(String symbol) throws ParseException {
+        if ("+".equals(symbol)) {
+            return new Operation(Operator.ADD);
+        } else if ("-".equals(symbol)) {
+            return new Operation(Operator.SUBTRACT);
+        } else if ("*".equals(symbol)) {
+            return new Operation(Operator.MULTIPLY);
+        } else if ("/".equals(symbol)) {
+            return new Operation(Operator.DIVIDE);
         } else {
-            precedent = 1;
+            throw new ParseException("Unknown symbol " + symbol);
         }
+    }
+    
+    private Operation(Operator operator) {
+        this.operator = operator;
     }
 
     @Override
     public int compareTo(Operation o) {
-        return precedent - o.precedent;
+        return operator.precedence - o.operator.precedence;
     }
 
     @Override
     public String toString() {
-        return "\t" + symbol + "\t\n" + a + "\t" + b;
+        return "\t" + operator.symbol + "\t\n" + a + "\t" + b;
     }
-
+    
     @Override
     public BigDecimal evaluate() {
         BigDecimal aVal = a.evaluate();
         BigDecimal bVal = b.evaluate();
-
-        // TODO move to subclass
-        if ("*".equals(symbol)) {
-            return aVal.multiply(bVal, MathContext.DECIMAL128);
-        } else if ("/".equals(symbol)) {
-            // TODO NaN
-            return aVal.divide(bVal, MathContext.DECIMAL128);
-        } else if ("+".equals(symbol)) {
-            return aVal.add(bVal, MathContext.DECIMAL128);
-        } else if ("-".equals(symbol)) {
-            return aVal.subtract(bVal, MathContext.DECIMAL128);
-        } else {
-            // TODO Use enum so can't happen
-            return BigDecimal.ZERO;
+        
+        switch(operator) {
+        case ADD:
+            return aVal.add(bVal, SIGFIG_20_CONTEXT);
+        case SUBTRACT:
+            return aVal.subtract(bVal, SIGFIG_20_CONTEXT);
+        case MULTIPLY:
+            return aVal.multiply(bVal, SIGFIG_20_CONTEXT);
+        case DIVIDE:
+        default:
+            return aVal.divide(bVal, SIGFIG_20_CONTEXT);
         }
     }
+    
+    private enum Operator {
+        ADD("+", 1), SUBTRACT("-", 1) , MULTIPLY("*", 2) , DIVIDE("/", 2); 
+        
+        String symbol;
+        int precedence;
+        
+        private Operator(String symbol, int precedence) {
+            this.symbol = symbol;
+            this.precedence = precedence;
+        }
+    }
+
 }
