@@ -1,5 +1,7 @@
 package calc;
 
+import java.math.BigDecimal;
+
 import calc.Tokenizer.Token;
 import calc.Tokenizer.TokenType;
 
@@ -22,16 +24,16 @@ public class Calculator {
     }
     
     public static String calculateString(String input) throws ParseException {
-        float f = calculateFloat(input);
-        
-        return Float.toString(f);
-    }
-    
-    public static float calculateFloat(String input) throws ParseException {
-        Tokenizer tokenizer = new Tokenizer(input);
-        OperandLinkedList operand = nextOperandLinkedList(tokenizer);
-        Expression expression = operand.toExpression();
-        return expression.evaluate();
+        try {
+            Tokenizer tokenizer = new Tokenizer(input);
+            OperandLinkedList operand = nextOperandLinkedList(tokenizer);
+            Expression expression = operand.toExpression();
+            BigDecimal answer = expression.evaluate();
+            // TODO: Fix scale
+            return answer.setScale(Math.min(answer.scale(), 19), BigDecimal.ROUND_DOWN).toString();
+        } catch(ArithmeticException e) {
+            return "NaN";
+        }
     }
 
     static OperandLinkedList nextOperandLinkedList(Tokenizer tokenizer) throws ParseException {
@@ -46,7 +48,7 @@ public class Calculator {
         if (token.type == TokenType.NUMBER) {
             // Return the nary formed from exp and narymore
             OperandLinkedList operand = new OperandLinkedList();
-            operand.expression = new Number(Float.valueOf(token.value)); // TODO NFE
+            operand.expression = Number.valueOf(token.value); // TODO NFE
             operand.nary = nextNaryLinkedList(tokenizer);
             return operand;
         } else if (token.type == TokenType.OPEN_PAREN) {
@@ -97,17 +99,5 @@ public class Calculator {
             throw new ParseException("Expecting an operator, or unclosed parentheses");
         }
     }
-
-
-//
-//    class Group implements Expression {
-//        Expression inner;
-//
-//        @Override
-//        public float evaluate() {
-//            return inner.evaluate();
-//        }
-//    }
-//    
 
 }

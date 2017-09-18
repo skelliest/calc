@@ -1,5 +1,8 @@
 package calc;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+
 public class Operation implements Expression, Comparable<Operation> {
     Expression a, b;
 
@@ -28,23 +31,23 @@ public class Operation implements Expression, Comparable<Operation> {
     }
 
     @Override
-    public float evaluate() {
-        float aVal = a.evaluate();
-        float bVal = b.evaluate();
+    public BigDecimal evaluate() {
+        BigDecimal aVal = a.evaluate();
+        BigDecimal bVal = b.evaluate();
 
         // TODO move to subclass
         if ("*".equals(symbol)) {
-            return aVal * bVal;
+            return aVal.multiply(bVal, MathContext.DECIMAL128);
         } else if ("/".equals(symbol)) {
             // TODO NaN
-            return aVal / bVal;
+            return aVal.divide(bVal, MathContext.DECIMAL128);
         } else if ("+".equals(symbol)) {
-            return aVal + bVal;
+            return aVal.add(bVal, MathContext.DECIMAL128);
         } else if ("-".equals(symbol)) {
-            return aVal - bVal;
+            return aVal.subtract(bVal, MathContext.DECIMAL128);
         } else {
             // TODO Use enum so can't happen
-            return 0;
+            return BigDecimal.ZERO;
         }
     }
 }

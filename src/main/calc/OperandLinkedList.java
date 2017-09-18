@@ -5,6 +5,8 @@ public class OperandLinkedList {
     Expression expression;
     NaryLinkedList nary;
 
+    // Transform this linked list into an expression tree.  This is what
+    // takes care of the operator precedence
     public Expression toExpression() {
         Operation rootOperation = null;
         OperandLinkedList next = this;

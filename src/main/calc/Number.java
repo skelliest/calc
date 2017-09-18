@@ -1,19 +1,24 @@
 package calc;
 
-class Number implements Expression {
-    float value;
+import java.math.BigDecimal;
 
-    Number(float value) {
-        this.value = value;
+class Number implements Expression {
+    BigDecimal value;
+    int fractionalSigfig;
+
+    public static Number valueOf(String string) {
+        Number number = new Number();
+        number.value = new BigDecimal(string);
+        return number;
     }
 
     @Override
     public String toString() {
-        return Float.toString(value);
+        return value.toString();
     }
 
     @Override
-    public float evaluate() {
+    public BigDecimal evaluate() {
         return value;
     }
 }

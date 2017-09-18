@@ -1,5 +1,7 @@
 package calc;
 
+import java.math.BigDecimal;
+
 public interface Expression {
-    float evaluate();
+    BigDecimal evaluate();
 }
