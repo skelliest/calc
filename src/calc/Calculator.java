@@ -13,17 +13,24 @@ public class Calculator {
     // item -> number
 
     public static void main(String args[]) {
-        String input = "2+(3+4)/2";
-
-        Tokenizer tokenizer = new Tokenizer(input);
-
         try {
-            Nary nary = nextNary(tokenizer);
-            Expression expression = nary.toExpression();
-            System.out.println(expression.evaluate());
+            System.out.println(calculateString("-1"));
         } catch (ParseException e) {
             System.err.println(e.getMessage());
         }
+    }
+    
+    public static String calculateString(String input) throws ParseException {
+        float f = calculateFloat(input);
+        
+        return Float.toString(f);
+    }
+    
+    public static float calculateFloat(String input) throws ParseException {
+        Tokenizer tokenizer = new Tokenizer(input);
+        Nary nary = nextNary(tokenizer);
+        Expression expression = nary.toExpression();
+        return expression.evaluate();
     }
 
     static Nary nextNary(Tokenizer tokenizer) throws ParseException {

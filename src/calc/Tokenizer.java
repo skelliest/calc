@@ -29,13 +29,15 @@ public class Tokenizer {
     }
     
     public boolean hasNext() {
+        scanner.skip("\\s*"); // :/
+
         return scanner.hasNext();
     }
 
     public Token nextOperandToken() throws ParseException {
         scanner.skip("\\s*");
         
-        if (scanner.hasNext(numberPattern)) {
+        if (scanner.hasNext("[-0-9]")) { // TODO: Fix, doesn't catch malformed isolated negative sign            
             return new Token(TokenType.NUMBER, scanner.findInLine(numberPattern));
         } else if (scanner.hasNext("\\(")) {
             scanner.next(); // Pop off paren
