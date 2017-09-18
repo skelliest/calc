@@ -8,9 +8,13 @@ public class OperandLinkedList {
     // Transform this linked list into an expression tree.  This is what
     // takes care of the operator precedence
     public Expression toExpression() throws ParseException {
+        if (nary == NaryLinkedList.EMPTY) {
+            return expression;
+        }
+        
         Operation rootOperation = null;
         OperandLinkedList next = this;
-
+        
         while (next.nary != NaryLinkedList.EMPTY) {
             NaryLinkedList operator = next.nary;
 

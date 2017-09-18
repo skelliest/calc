@@ -45,8 +45,6 @@ public class Calculator {
 
     static OperandLinkedList nextOperandLinkedList(Tokenizer tokenizer, boolean open) throws ParseException {
         if (!tokenizer.hasNext()) {
-            // Else throw parseexception
-            // TODO: Unless original string is all whitespace
             throw new ParseException();
         }
     

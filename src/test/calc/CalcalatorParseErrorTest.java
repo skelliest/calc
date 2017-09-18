@@ -22,4 +22,11 @@ public class CalcalatorParseErrorTest {
         Calculator.calculateString("1 + ( 2 - - 3 )");
     }
 
+    // The empty string cannot be assigned a value, so should not parse
+    @Test(expected = ParseException.class)
+    public void testEmptyString() throws ParseException {
+        Calculator.calculateString("");
+        Calculator.calculateString("    ");
+    }
+    
 }

@@ -36,7 +36,6 @@ public class Tokenizer {
             scanner.next(); // Pop off paren
             return new Token(TokenType.OPEN_PAREN, "(");
         } else {
-            // TODO: End of file is okay here
             throw new ParseException("Malformed operand " + scanner.next());
         }
     }
@@ -50,7 +49,6 @@ public class Tokenizer {
             scanner.next(); // Pop off paren
             return new Token(TokenType.CLOSE_PAREN, ")");
         } else {
-            // TODO: End of file is not okay here
             throw new ParseException("Malformed n-ary expression " + scanner.next());
         }
     }

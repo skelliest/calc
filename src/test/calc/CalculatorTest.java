@@ -36,4 +36,13 @@ public class CalculatorTest {
         comparisonTest("  2 +(3*1)", "5");
         comparisonTest("2+(3* 1)      ", "5");
     }
+
+    // Bare numbers are okay
+    @Test
+    public void testBareNumber() {
+        comparisonTest("1", "1");
+        comparisonTest("-1", "-1");
+        comparisonTest(" 2 ", "2");
+    }
+
 }
