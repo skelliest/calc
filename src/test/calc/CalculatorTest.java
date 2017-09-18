@@ -4,8 +4,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import calc.Calculator.ParseException;
-
 public class CalculatorTest {
 
     public static void comparisonTest(String testString, String expectedOutput) {

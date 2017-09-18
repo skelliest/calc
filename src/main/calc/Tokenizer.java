@@ -3,15 +3,8 @@ import java.io.StringReader;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import calc.Calculator.ParseException;
-
 public class Tokenizer {
 
-    // operand -> ( operand
-    // operand -> number n-ary
-    // n-ary -> operator operand
-    // n-ary -> ) n-ary
-    
     private final Scanner scanner;
     private static final Pattern numberPattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
     private static final Pattern operatorPattern = Pattern.compile("[\\+\\-\\*/]");
