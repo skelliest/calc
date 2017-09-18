@@ -53,7 +53,7 @@ public class Calculator {
         if (token.type == TokenType.NUMBER) {
             // Return the nary formed from exp and nary
             OperandLinkedList operand = new OperandLinkedList();
-            operand.expression = Number.valueOf(token.value); // TODO NFE
+            operand.expression = Number.valueOf(token.value);
             operand.nary = nextNaryLinkedList(tokenizer, open);
             return operand;
         } else if (token.type == TokenType.OPEN_PAREN) {
